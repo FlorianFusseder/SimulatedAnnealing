@@ -1,33 +1,23 @@
-﻿namespace SimulatedAnnealing
+﻿using System;
+
+namespace SimulatedAnnealing
 {
     internal class RandomNumberGenerator
     {
         public int Seed { get; private set; }
-        public int UpperBoundary { get; set; }
-        public int getNewRandomNumber
-        {
-            get
-            {
-                randNumber = (a * this.Seed + b) % this.UpperBoundary;
-                return randNumber;
-            }
-            set { randNumber = value; }
-        }
-        public int getLastRandomNumber { get { return this.randNumber; } }
 
         private readonly int a = 1664525;
         private readonly int b = 1013904223;
-        private int randNumber;
 
-        public RandomNumberGenerator(int seed = 1, int maxValue = 100)
+        public RandomNumberGenerator(int seed = 50)
         {
+            
             this.Seed = seed;
-            this.UpperBoundary = maxValue;
         }
 
         public override string ToString()
         {
-            return $"current Random Number: {randNumber}";
+            return $"current Random Number: {Seed}";
         }
 
         public override bool Equals(object obj)
@@ -43,6 +33,20 @@
         public override int GetHashCode()
         {
             return this.Seed.GetHashCode();
+        }
+
+        public int Next()
+        {
+            Seed = (a * Seed + b) % Int32.MaxValue;
+            return Seed;
+        }
+
+        public int Next(int maxVal)
+        {
+
+            if (maxVal == 0)
+                return 0;
+            return Math.Abs(Next() % maxVal);
         }
 
     }

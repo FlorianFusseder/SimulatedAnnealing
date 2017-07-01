@@ -8,7 +8,7 @@ namespace SimulatedAnnealing
     internal static class DataReader
     {
         private static string line = string.Empty;
-        internal static DistanceMatrix ReadTSP(string v)
+        internal static TourManager ReadTSP(string v)
         {
             var list = new List<Tuple<int, int>>();
 
@@ -42,7 +42,7 @@ namespace SimulatedAnnealing
                 }
             }
 
-            return new DistanceMatrix(list);
+            return new TourManager(list);
         }
     }
 }

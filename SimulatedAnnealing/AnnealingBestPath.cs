@@ -4,11 +4,38 @@ namespace SimulatedAnnealing
 {
     internal class AnnealingBestPath
     {
-        private DistanceMatrix distaceMatrix;
+        private TourManager manager;
+        
+        private RandomNumberGenerator randGen;
 
-        public AnnealingBestPath(DistanceMatrix distaceMatrix)
+        public AnnealingBestPath(TourManager distaceMatrix, RandomNumberGenerator randGen)
         {
-            this.distaceMatrix = distaceMatrix;
+            manager = distaceMatrix;
+            this.randGen = randGen;
+        }
+
+        public Tour randomTours(int repeats = 1)
+        {
+            for (int i = 0; i < repeats; i++)
+            {
+                manager.CreateRandTour(i);
+            }
+
+            Tour t = manager.BestTour;
+
+            return manager.BestTour;
+        }
+
+        internal Tour sukzessiveTours(int repeats =1)
+        {
+            for (int i = 0; i < repeats; i++)
+            {
+                manager.CreateSukzessiveTour(i);
+            }
+
+            Tour t = manager.BestTour;
+
+            return manager.BestTour;
         }
     }
 }
