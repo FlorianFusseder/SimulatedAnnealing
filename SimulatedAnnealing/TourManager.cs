@@ -12,7 +12,6 @@ namespace SimulatedAnnealing
         private RandomNumberGenerator randGen;
         public Tour CurrentTour { get; set; }
         public Tour BestTour { get; private set; }
-        public Tuple<int, int> StartLocation { get; private set; }
 
         public TourManager(List<Tuple<int, int>> list)
         {
@@ -33,6 +32,24 @@ namespace SimulatedAnnealing
 
         }
 
+        internal void SetCurrentAsBest()
+        {
+            if (CurrentTour.List != null)
+            {
+                BestTour.List = new List<int>(CurrentTour.List);
+                CalcTourLength(BestTour);
+            }
+        }
+
+        internal void SetBestAsCurrent()
+        {
+            if (BestTour.List != null)
+            {
+                CurrentTour.List = new List<int>(BestTour.List);
+                CalcTourLength(CurrentTour);
+            }
+        }
+
         public uint CalculateDistance(int x, int y)
         {
             int val;
@@ -46,7 +63,8 @@ namespace SimulatedAnnealing
             return locationList[index];
         }
 
-        private void CalcTourLength(Tour t)
+        public void CalcTourLength(Tour t)
+
         {
             t.AbsoluteDistance = 0;
             for (int i = 0; i < t.List.Count - 1; i++)
@@ -55,7 +73,7 @@ namespace SimulatedAnnealing
             }
         }
 
-        public void CreateRandTour(int iteration)
+        public void CreateRandomTour(int iteration)
         {
             CurrentTour = new Tour
             {
@@ -75,9 +93,25 @@ namespace SimulatedAnnealing
             CurrentTour.List.Add(CurrentTour.List[0]);
 
             CalcTourLength(CurrentTour);
-            CompareTours(iteration);
+            if (CurrentIsNewBest(iteration))
+                SetCurrentAsBest();
         }
-        public void CreateSukzessiveTour(int iteration)
+
+        public void GetBestSukzessiveTour()
+        {
+            for (int i = 0; i < locationList.Count; i++)
+            {
+                SukzessivFromStartLocation(i);
+            }
+        }
+
+        public void GetRandomSukzessiveTour(int iteration)
+        {
+            int start = randGen.Next(locationList.Count - 1);
+            SukzessivFromStartLocation(start);
+        }
+
+        public void SukzessivFromStartLocation(int startLocation)
         {
             CurrentTour = new Tour
             {
@@ -85,7 +119,7 @@ namespace SimulatedAnnealing
             };
             var tempList = makeList();
 
-            int start = randGen.Next(locationList.Count - 1);
+            int start = startLocation;
             CurrentTour.List.Add(tempList.ElementAt(start));
             tempList.RemoveAt(start);
 
@@ -98,11 +132,12 @@ namespace SimulatedAnnealing
             CalcTourLength(CurrentTour);
 
             while (CurrentTour.List.Count < locationList.Count)
-            {     
-                var nextLocation = GetOptimalLocation();
+            {
+                var nextLocation = GetNextBestLocation();
                 FindBestOrder(nextLocation);
             }
-            CompareTours(iteration);
+            if (CurrentIsNewBest(startLocation))
+                SetCurrentAsBest();
         }
 
         private void FindBestOrder(int nextLocation)
@@ -110,7 +145,7 @@ namespace SimulatedAnnealing
             Tour tmpTour = new Tour();
             Tour bestTmpTour = new Tour { AbsoluteDistance = UInt32.MaxValue };
 
-            for (int i = 0; i < CurrentTour.List.Count; i++)
+            for (int i = 0; i < CurrentTour.List.Count - 1; i++)
             {
                 tmpTour.List = new List<int>(CurrentTour.List);
 
@@ -129,7 +164,7 @@ namespace SimulatedAnnealing
             CalcTourLength(CurrentTour);
         }
 
-        private int GetOptimalLocation()
+        private int GetNextBestLocation()
         {
             // To get a good Tour, search for the location that has biggest, smallest distance to a location in currentTour.
             // This means:
@@ -176,17 +211,14 @@ namespace SimulatedAnnealing
             return location;
         }
 
-        private void CompareTours(int iteration)
+        private bool CurrentIsNewBest(int iteration)
         {
             if (CurrentTour.AbsoluteDistance < BestTour.AbsoluteDistance)
             {
                 Console.WriteLine($"Iteration {iteration}: New Best tour {BestTour.AbsoluteDistance} => {CurrentTour.AbsoluteDistance}");
-                BestTour = CurrentTour;
+                return true;
             }
-            //else
-            //{
-            //    Console.WriteLine($"Best: {BestTour.AbsoluteDistance} New: {CurrentTour.AbsoluteDistance}");
-            //}
+            return false;
         }
 
         private List<int> makeList()
@@ -200,9 +232,12 @@ namespace SimulatedAnnealing
             return tempList;
         }
 
-        private uint GetDistanceDiffernce(Tour t)
+        public int GetDistanceDiffernce()
         {
-            return t.AbsoluteDistance - CurrentTour.AbsoluteDistance;
+            if((int)CurrentTour.AbsoluteDistance - (int)BestTour.AbsoluteDistance > 1000000)
+                Console.WriteLine();
+
+            return (int)CurrentTour.AbsoluteDistance - (int)BestTour.AbsoluteDistance;
         }
     }
 }

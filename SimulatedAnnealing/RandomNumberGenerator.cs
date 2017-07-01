@@ -49,5 +49,10 @@ namespace SimulatedAnnealing
             return Math.Abs(Next() % maxVal);
         }
 
+        public double NextDouble()
+        {
+            double d = Math.Abs(Next(100000));
+            return d/100000;
+        }
     }
 }
