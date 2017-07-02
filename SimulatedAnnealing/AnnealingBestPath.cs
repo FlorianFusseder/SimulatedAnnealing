@@ -24,6 +24,12 @@ namespace SimulatedAnnealing
             return manager.BestTour;
         }
 
+        public Tour SimpleSukzessivTour(int start)
+        {
+            manager.SimpleSukzessivTour(start);
+            return manager.BestTour;
+        }
+
         public Tour SukzessivTours(int repeats = 1)
         {
             for (int i = 0; i < repeats; i++)
@@ -43,46 +49,60 @@ namespace SimulatedAnnealing
 
         public Tour SpecificTour(int startPosition)
         {
-            manager.SukzessivFromStartLocation(124);
+            manager.SukzessivFromStartLocation(startPosition);
             manager.SetBestAsCurrent();
             return manager.BestTour;
         }
 
-        public Tour StartAnnealing(Tour t)
+        public Tour StartAnnealing(Tour toEvaluate)
         {
-            //todo muss zeit runterza
-            for (int i = 100000; i > 0; i--)
-            {
-                manager.CurrentTour = localMove(t);
-                int d = manager.GetDistanceDiffernce();
 
+            Tour overallBest = new Tour
+            {
+                AbsoluteDistance = toEvaluate.AbsoluteDistance,
+                List = new List<int>(toEvaluate.List)
+            };
+
+            Console.WriteLine($"Start:\n{toEvaluate}\n");
+            
+
+            for (int i = 1000000; i > 0; i--)
+            {
+                manager.CurrentTour = localMove(toEvaluate);
+                int d = manager.GetDistanceDiffernce();
+                double time = i / 1000;
                 if (d <= 0)
                 {
-                    Console.WriteLine($"Found Improvement: {manager.CurrentTour.AbsoluteDistance} => { manager.BestTour.AbsoluteDistance}");
+                    //Console.WriteLine($"Found Improvement: {manager.CurrentTour.AbsoluteDistance} => { manager.BestTour.AbsoluteDistance}");
                     manager.SetCurrentAsBest();
+                    if (manager.BestTour.AbsoluteDistance < overallBest.AbsoluteDistance)
+                    {
+                        overallBest.AbsoluteDistance = manager.BestTour.AbsoluteDistance;
+                        overallBest.List = new List<int>(manager.BestTour.List);
+                        Console.Write("|");
+                        //Console.WriteLine($"New overall Best: {overallBest}");
+                    }
                 }
                 else
                 {
-                    var e = Math.Exp(-d / i);
+                    var e = Math.Exp(-d / time);
                     var rand = randGen.NextDouble();
+
                     if (e > rand)
                     {
-                        Console.WriteLine($"{e} > {rand}: Take worse solution: {manager.CurrentTour.AbsoluteDistance} => { manager.BestTour.AbsoluteDistance}");
                         manager.SetCurrentAsBest();
                     }
-                    else
-                    {
-                        Console.WriteLine($"!({e} > {rand}): Do nothing");
-                    }
-                    if (e != 1)
-                    {
-                        Console.WriteLine($"e:{e}, i:{i}, d:{d}");
-                        Console.ReadLine();
-                    }
+                }
+                if(i % 10000 == 0)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"Iterations left {i}");
+                    Console.WriteLine($"Overall best: {overallBest.AbsoluteDistance}");
+                    Console.WriteLine($"Current: {manager.CurrentTour.AbsoluteDistance}");
+                    Console.WriteLine($"Local best: {manager.BestTour.AbsoluteDistance}\n\n");
                 }
             }
-
-            return t;
+            return overallBest;
         }
 
         private Tour localMove(Tour t)
@@ -90,8 +110,6 @@ namespace SimulatedAnnealing
             Tour tl = new Tour { List = new List<int>(t.List) };
 
             var pos = randGen.Next(t.List.Count);
-            if(pos == 0 || pos == t.List.Count - 1 || pos == t.List.Count - 2)
-                Console.WriteLine();
 
             if (pos == 0 || pos == t.List.Count - 1)
             {

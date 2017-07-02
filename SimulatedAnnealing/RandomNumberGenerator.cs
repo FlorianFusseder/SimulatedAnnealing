@@ -9,9 +9,8 @@ namespace SimulatedAnnealing
         private readonly int a = 1664525;
         private readonly int b = 1013904223;
 
-        public RandomNumberGenerator(int seed = 50)
+        public RandomNumberGenerator(int seed = 8)
         {
-            
             this.Seed = seed;
         }
 
@@ -51,8 +50,9 @@ namespace SimulatedAnnealing
 
         public double NextDouble()
         {
-            double d = Math.Abs(Next(100000));
-            return d/100000;
+            int i = Math.Abs(Next(100000));
+            double d = (double)i/(double)100000;
+            return d;
         }
     }
 }

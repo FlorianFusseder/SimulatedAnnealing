@@ -16,14 +16,17 @@ namespace SimulatedAnnealing
 
             Tour t1;
             Tour t2;
-            // t1 = annealing.RandomTours(1000);
-            // t1 = annealing.SukzessivTours(124);
+            t1 = annealing.RandomTours();
+            // t1 = annealing.SukzessivTours();
             // t1 = annealing.AllSukzessivTours();
-            t1 = annealing.SpecificTour(124);
-            t2 = annealing.StartAnnealing(t1);
+            // t1 = annealing.SpecificTour(5);
+            // t1 = annealing.SimpleSukzessivTour(19);
             Console.WriteLine(t1);
-            Console.WriteLine(t2);
-            
+            Tour t3 = new Tour { AbsoluteDistance = t1.AbsoluteDistance, List = new List<int>(t1.List) };
+
+            t2 = annealing.StartAnnealing(t1);
+            Console.WriteLine($"Started at: {t3}\n");
+            Console.WriteLine($"Optimized: {t2}");
         }
     }
 }
